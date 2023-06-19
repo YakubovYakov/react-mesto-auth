@@ -26,12 +26,12 @@ const Login = ({ handleLogin }) => {
 		}
 		const { password, email } = userData;
 		auth.login(password, email)
-			.then((data) => {
-				if(data.token) {
-					localStorage.setItem('token', data.token);
-					handleLogin();
+			.then((res) => {
+				
+					localStorage.setItem('jwt', res.token);
+					//handleLogin();
 					navigate('/', {replace: true})
-				}
+				
 			})
 			.catch(err => console.log(err));
 		}
