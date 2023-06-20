@@ -34,11 +34,12 @@ function App() {
 
 	const [isInfoTooltip, setInfoTooltip]	= React.useState({isOpen: false, successful: false});
 
-  const navigate = useNavigate;
+  const navigate = useNavigate();
   const [cards, setCards] = React.useState([]);
 
   // ----------- Состояния авторизации пользователя и его данных
-  const [isloggedIn, setIsLoggedIn] = React.useState(false);
+  //const [isloggedIn, setIsLoggedIn] = useState(localstorage.getItem("jwt")||false); 
+	const [isloggedIn, setIsLoggedIn] = useState(localStorage.getItem("token")? true :false)
   const [email, setEmail] = React.useState("");
 
   // ----------- При загрузке страницы получам данные карточек
@@ -70,39 +71,13 @@ function App() {
   }, [isloggedIn]);
 
   //----------- При загрузке страницы проверяем токен и перенаправляем пользователя
-  // React.useEffect(() => {
-	// 	const token = localStorage.getItem('token');
-  //   if (token) {
-  //     auth
-  //       .checkToken(token)
-  //       .then(res) {
-	// 				setEmail(res.data.email);
-	// 				handleLoggedIn();
-  //         navigate("/", { replace: true });
-	// 	    } 
-	// 			})
-	// 		}
-  // }, [navigate]);
-
-  // React.useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (token) {
-  //     auth.checkToken(token).then((data) => {
-  //       if (data) {
-  //         setEmail(data.data.email);
-  //         handleLoggedIn();
-  //         navigate("/", { replace: true });
-  //       }
-  //     });
-  //   }
-  // }, []);
-
 	React.useEffect(() => {
-		if (localStorage.getItem("jwt")) {
+		const token = localStorage.getItem('jwt')
+		if (token) {
 			auth
 			.checkToken()
 			.then((res) => {
-				handleLoggedIn();
+				setIsLoggedIn(true);
 				navigate("/", {replace: true});
 				setEmail(res.data.email)
 			})
@@ -242,8 +217,20 @@ function App() {
   }
 	//----------- Обработчик авторизации
 
-	const handleLogin = () => {
-		setIsLoggedIn(true);
+	function handleLogin({email, password}) {
+		 auth
+			.login({email, password})
+			.then(res => {
+				console.log(res);
+				setEmail(email);
+				setIsLoggedIn(true);
+				navigate("/", { replace: true });
+				localStorage.setItem('token', res.token);
+			
+		})
+		.catch(err => {
+			console.log(err);
+		})
 		//handleInfoTooltip(false);
 	}
   // function handleLogin({email, password}) {
@@ -266,59 +253,51 @@ function App() {
 
   function handleSighOut() {
     localStorage.removeItem("jwt");
-    setIsLoggedIn(false);
-    //setEmail("");
-    navigate("/sign-in", { replace: true });
+    setEmail("")
   }
 
   // ----------- Разметка JSX
   return (
     <div className="page">
-      <CurrentUserContext.Provider value={currentUser}>
-        <Header email={email} handleSighOut={handleSighOut} isloggedIn={isloggedIn}/>
+      <CurrentUserContext.Provider value={currentUser || ""}>
+        <Header email={email} handleSighOut={handleSighOut} />
         <Routes>
+					<Route
+						path="*"
+						element={
+							isloggedIn ? (
+								<Navigate to="/" />
+							) : (
+								<Navigate to="/sign-in" />
+								)
+							}
+					/>
+							<Route
+								path="/sign-up"
+								element={<Register onSubmit={handleRegister} />}
+							/>
+						<Route
+							path="/sign-in"
+							element={<Login onLogin={handleLogin} />}
+						/>
           <Route
-            //path="/"
+            path="/"
             element={
-              <ProtectedRoute
-                exact
-                path="/"
-                component={Main}
-                onEditProfile={handleEditProfileClick}
-                onAddPlace={handleAddPlaceClick}
-                onEditAvatar={handleEditAvatarClick}
-                onCardClick={handleCardClick}
-                onCardLike={handleCardLike}
-                onCardDelete={handleCardDelete}
-                cards={cards}
-                isloggedIn={isloggedIn}
+							<ProtectedRoute						
+							isloggedIn={isloggedIn}
+							element={Main}
+							onEditProfile={handleEditProfileClick}
+							onAddPlace={handleAddPlaceClick}
+							onEditAvatar={handleEditAvatarClick}
+							onCardClick={handleCardClick}
+							onCardLike={handleCardLike}
+							onCardDelete={handleCardDelete}
+							cards={cards}
+							onClose={closeAllPopups}
               />
             }
-          />
-
-          <Route
-            path="*"
-            element={
-              isloggedIn ? (
-                <Navigate to="/" replace />
-              ) : (
-                <Navigate to="/sign-in" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/sign-up"
-            element={<Register onSubmit={handleRegister} />}
-          />
-
-          <Route
-            path="/sign-in"
-            element={<Login  />}
-          />
-        </Routes>
-
-				<Footer />
+						/>
+						</Routes>
 
         <ImagePopup
           isOpened={isOpenedImage}
@@ -342,17 +321,18 @@ function App() {
           onDeleteCard={handleCardDelete}
         />
 				<InfoTooltip result={isInfoTooltip} onClose={closeAllPopups} />
-        {/* <PopupWithForm
+        <PopupWithForm
           title="Вы уверены?"
           name="delete"
-          isOpened={isOpenedDelete}
+          //isOpen={isOpenedDelete}
           onClose={closeAllPopups}
           //buttonName="ДА"
-        >
+					>
           <button className="popup__button" id="delete-button" type="submit">
-            ДА
+					ДА
           </button>
-        </PopupWithForm> */}
+        </PopupWithForm>
+				<Footer />
       </CurrentUserContext.Provider>
     </div>
   );

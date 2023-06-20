@@ -2,39 +2,51 @@ import React, {useState}  from "react";
 import { useNavigate } from "react-router-dom";
 import * as auth from "../utils/auth" 
 
-const Login = ({ handleLogin }) => {
-	const [userData, setUserData] = useState({
-		email: '',
-		password: ''
-	})
+function Login({ onLogin }) {
+	const [email, setEmail] = React.useState('')
+	const [password, setPassword] = React.useState('')
 
-	const navigate = useNavigate();
+	// const handleChange = (e) => {
+	// 	const {name, value} = e.target;
 
-	const handleChange = (e) => {
-		const {name, value} = e.target;
+	// 	setUserData({
+	// 		...userData,
+	// 		[name]: value
+	// 	});
+	// }
 
-		setUserData({
-			...userData,
-			[name]: value
-		});
+	function handleChangeEmail(e) {
+		setEmail(e.target.value);
+	}
+
+	function handleChangePassword(e) {
+		setPassword(e.target.value);
 	}
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		if (!userData.email || !userData.password) {
+		if (!email || !password) {
 			return;
 		}
-		const { password, email } = userData;
-		auth.login(password, email)
-			.then((res) => {
+		onLogin({password, email})
+	}
+
+	// const handleSubmit = (e) => {
+	// 	e.preventDefault();
+	// 	if (!userData.email || !userData.password) {
+	// 		return;
+	// 	}
+	// 	const { password, email } = userData;
+	// 	auth.login(password, email)
+	// 		.then((res) => {
 				
-					localStorage.setItem('jwt', res.token);
-					//handleLogin();
-					navigate('/', {replace: true})
+	// 				localStorage.setItem('jwt', res.token);
+	// 				//handleLogin();
+	// 				navigate('/', {replace: true})
 				
-			})
-			.catch(err => console.log(err));
-		}
+	// 		})
+	// 		.catch(err => console.log(err));
+	// 	}
 		
 		return (
 			<section className="register page__center">
@@ -49,8 +61,8 @@ const Login = ({ handleLogin }) => {
 					<div>
 						<label className="form__label">
 						<input
-							value={userData.email}
-							onChange={handleChange}
+							value={email}
+							onChange={handleChangeEmail}
 							className="register__input"
 							type="email"
 							placeholder="Email"
@@ -62,8 +74,8 @@ const Login = ({ handleLogin }) => {
 					</label>
 					<label className="form__label">
 						<input
-							value={userData.password}
-							onChange={handleChange}
+							value={password}
+							onChange={handleChangePassword}
 							type="password"
 							id="password"
 							placeholder="Пароль"

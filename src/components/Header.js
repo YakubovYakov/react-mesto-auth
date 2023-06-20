@@ -38,7 +38,7 @@ function Header({ email, handleSighOut }) {
               element={
                 <NavLink
                   className="header__text header__link-text"
-                  to="sign-up"
+                  to="/sign-up"
                 >
                   Регистрация
                 </NavLink>

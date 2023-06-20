@@ -26,6 +26,7 @@
 	
 	background-color: #000;
   font-family: 'Inter', "Arial", sans-serif;
+	flex: 1;
 	color: #FFF;
 	padding: 45px 0 60px;
 	min-width: 320px;

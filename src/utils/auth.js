@@ -14,7 +14,7 @@ const checkResponce = (res) =>
 		}).then((res) => checkResponce(res))
 	};
 
-	export const login = (password, email) => {
+	export const login = ({password, email}) => {
 		return fetch(`${BASE_URL}/signin`, {
 			method: "POST",
 			headers: {
@@ -22,7 +22,8 @@ const checkResponce = (res) =>
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({password, email})
-		}).then((res) => checkResponce(res))
+		}).then((res) => 
+			checkResponce(res))
 	};
 
 // export const login = ({email, password}) => {
@@ -35,18 +36,28 @@ const checkResponce = (res) =>
 //   }).then((res) => checkResponce(res))
 // };
 
-export const checkToken = (token) => {
-  return fetch(`${BASE_URL}/users/me`, {
-    method: "GET",
-    headers: {
-      Accept: "appliccation/json",
-      "Content-Type": "appliccation/json",
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  });
-};
+// export const checkToken = (token) => {
+//   return fetch(`${BASE_URL}/users/me`, {
+//     method: "GET",
+//     headers: {
+//       "Accept": "appliccation/json",
+//       "Content-Type": "appliccation/json",
+//       "Authorization": `Bearer ${token}`,
+//     },
+//   }).then((res) => {
+//     if (res.ok) {
+//       return res.json();
+//     }
+//     return Promise.reject(`Ошибка: ${res.status}`);
+//   });
+// };
+export const checkToken = () => {
+	return fetch(`${BASE_URL}/users/me`, {
+		method: 'GET',
+		headers: {
+			//"Accept": "appliccation/json",
+			"Content-Type": "application/json",
+			"Authorization": `Bearer ${localStorage.getItem("jwt")}`,
+		},
+	}).then((res) => checkResponce(res))
+}
